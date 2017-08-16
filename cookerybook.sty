@@ -21,13 +21,13 @@
 \RequirePackage{fancyhdr}					 % Customizing header and footer
 \RequirePackage{etoolbox}					 % Facilitates some macro definitions
 \RequirePackage[utf8]{inputenc}   			 % Handle Umlaute correct by default
-\RequirePackage{wrapfig}   			 		 % Handle Umlaute correct by default
-\RequirePackage{tabulary}   		 		 % Handle Umlaute correct by default
+\RequirePackage{wrapfig}   			 		 % Allow wrapped tabulars
+\RequirePackage{tabulary}   		 		 % Enhanced tabular
+\RequirePackage[ngerman, english]{babel}     % Some language optimization stuff
 
-% font
-\RequirePackage{DejaVuSans}
+\RequirePackage{DejaVuSans}					 % Font sans serif
 \renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
-
+\RequirePackage{lmodern}					 % Makes fonts look nicer. Has to be set after font is chosen.
 
 \DeclareRobustCommand{\textcelcius}{\ensuremath{^{\circ}\mathrm{C}}}
 
@@ -131,5 +131,5 @@
 }
 
 
-\endinput   % MUST be the last command in a .sty
-%EOF
+\endinput   % must be the last command in a .sty
+%eof

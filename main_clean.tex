@@ -4,43 +4,14 @@ a4paper,
 11pt
 ]{article} 
 
-% encoding, font, language
-\usepackage{DejaVuSans}
-%% Another possibility is
-%% \usepackage{dejavu}
-%% which loads the DejaVu Serif and DejaVu Sans Mono fonts as well
-\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage{fancyhdr}
-\usepackage[ngerman, english]{babel}
-\usepackage{blindtext}
-\usepackage{nicefrac}
-
-\iffalse
 \usepackage[
 nowarnings,
 %myconfig 
 ]
 {xcookybooky}
-\fi
 
 \usepackage{cookerybook}
-
 \usepackage{blindtext}    % only needed for generating test text
-
-\DeclareRobustCommand{\textcelcius}{\ensuremath{^{\circ}\mathrm{C}}}
-
-
-%\setcounter{secnumdepth}{1}
-%\renewcommand*{\recipesection}[2][]
-%{%
-%	\subsection[#1]{#2}
-%}
-\renewcommand{\subsectionmark}[1]
-{% no implementation to display the section name instead
-}
-
 
 \usepackage{hyperref}    % must be the last package
 \hypersetup{%
@@ -74,17 +45,13 @@ nowarnings,
 	\begin{abstract}
 		Introduction to the cookbook.
 	\end{abstract}
-	% If you are interested in modifying the layout of \texttt{xcookybooky} you will find examples in the documentation as well as in the configuration file \textbf{xcookybooky.cfg}.
-	
 	
 	\tableofcontents
-	
-	\vspace{5em}
 	
 	\include{tex/section_basics}
 	
 	\section{Recipes}
-	who cleares the fucking page?! then again, we need a cover sheet for the recipes
+	who cleares the fucking page?! then again, we need a cover sheet for the rec
 	
 	\include{tex/TestRecipe}
 	
