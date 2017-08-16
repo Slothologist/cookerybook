@@ -6,20 +6,34 @@
 
 % TODO's
 % twosided thing
+% line under title
+% recipes shall appear in the TOC
 % add pictures
 % fix table
 % pass language argument, change hardcoded words respectively
-% add units: kg, TL, EL, ml, l, none (with optional additional text)
+% calorie calculation
+% price calculation
+% fix ü's
+% what does cookery booky fucky do that pages look good? --> nothing. but make pages nicer
+
 
 \RequirePackage{cookingsymbols}              % Cookings symbols e.g. \Oven, \Dish etc
 \RequirePackage{fancyhdr}					 % Customizing header and footer
 \RequirePackage{etoolbox}					 % Facilitates some macro definitions
 \RequirePackage[utf8]{inputenc}   			 % Handle Umlaute correct by default
+\RequirePackage{wrapfig}   			 		 % Handle Umlaute correct by default
+\RequirePackage{tabulary}   		 		 % Handle Umlaute correct by default
 
+% font
+\RequirePackage{DejaVuSans}
+\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+
+
+\DeclareRobustCommand{\textcelcius}{\ensuremath{^{\circ}\mathrm{C}}}
 
 \pagenumbering{gobble}						 % Remove pagenumbering before TOC
 
-\let\oldtoc\tableofcontents
+\let\oldtoc\tableofcontents  % Let another commandname point to \toc, so it can be used while redefining itself
 \renewcommand{\tableofcontents}
 {% Roman pagenumbering in TOC, arabic starting after TOC is drawn
 	\clearpage
@@ -29,29 +43,91 @@
 	\pagenumbering{arabic}
 }
 
+\newcounter{ingredientsCounter}
+\newcounter{spicesCounter}
 
 \newenvironment{cleanrecipe}[1]
-{%this will be executed at \begin{cleanrecipe}
-	
-		\def\ingContent{& \textbf{Zutaten} \\}
+{% This will be executed at \begin{cleanrecipe}
 		
+		% Reset counters.
+		\setcounter{ingredientsCounter}{0}
+		\setcounter{spicesCounter}{0}
+		
+		% In this variable, the ingredientstable content will be saved.
+		% It is initialized with the ingredients headline, depending on the language setting.
+		\def\ingredientsContent{& \textbf{Zutaten} }
+		\def\spicesContent{& \textbf{Gewrze} }
+		
+		% This command adds an already formatted entry to the ingredient
 		\newcommand{\addIngredient}[1]{
-			\appto\ingContent{ & ##1 \\ } % Double Hashtags are neccessary to distinguish nested parameter 
+			\addtocounter{ingredientsCounter}{1}
+			\appto\ingredientsContent{ \\ & ##1  } % Double Hashtags are neccessary to distinguish nested parameter 
+		}
+		\newcommand{\addSpice}[1]{
+			\addtocounter{spicesCounter}{1}
+			\appto\spicesContent{ \\ & ##1  } % Double Hashtags are neccessary to distinguish nested parameter 
 		}
 		
+		% The following commands take care of formatting the ingridient text.
+		% They also pass optional calorie and price things down to the correct macros.
 		\newcommand{\g}[2]{\addIngredient{\textbf{##1g} ##2}}
+		\newcommand{\kg}[2]{\addIngredient{\textbf{##1kg} ##2}}
+		\newcommand{\ml}[2]{\addIngredient{\textbf{##1ml} ##2}}
+		\newcommand{\liter}[2]{\addIngredient{\textbf{##1l} ##2}}
+		\newcommand{\tsp}[2]{\addIngredient{\textbf{##1 TL} ##2}}
+		\newcommand{\tbsp}[2]{\addIngredient{\textbf{##1 EL} ##2}}
+		\newcommand{\unitless}[2]{\addIngredient{\textbf{##1} ##2}}
 		
+		\newcommand{\spicesg}[2]{\addSpice{\textbf{##1g} ##2}}
+		\newcommand{\spiceskg}[2]{\addSpice{\textbf{##1kg} ##2}}
+		\newcommand{\spicesml}[2]{\addSpice{\textbf{##1ml} ##2}}
+		\newcommand{\spicesliter}[2]{\addSpice{\textbf{##1l} ##2}}
+		\newcommand{\spicestsp}[2]{\addSpice{\textbf{##1 TL} ##2}}
+		\newcommand{\spicestbsp}[2]{\addSpice{\textbf{##1 EL} ##2}}
+		\newcommand{\spicesunitless}[2]{\addSpice{\textbf{##1} ##2}}
+		
+		% A little hacky and ugly title.
 		\begin{center}
 			\Large\textbf{#1}\normalsize
 		\end{center}
 }
-{%this will be executed at \end{cleanrecipe}
-	\begin{wraptable}{r}{5.5cm}
-		\begin{tabulary}{5.5cm}{rL}
-			\ingContent
-		\end{tabulary}
-	\end{wraptable}
-	\clearpage	
+{% This will be executed at \end{cleanrecipe}
+	
+	% Will be set if an ingredient / spices table must be printed.
+	\newboolean{useTable}
+	
+	% Evaluates which parts are set and therefore need to be printed.
+	\ifnum\value{ingredientsCounter}>0
+		\ifnum\value{spicesCounter}>0
+			\def\tableContent{
+				\ingredientsContent
+				\\ \\
+				\spicesContent}
+			\setboolean{useTable}{true} 
+		\else
+			\def\tableContent{
+				\ingredientsContent}
+			\setboolean{useTable}{true} 
+		\fi
+	\else
+		\ifnum\value{spicesCounter}>0
+			\def\tableContent{
+				\spicesContent}
+			\setboolean{useTable}{true}
+		\fi
+	\fi
+	
+	% Only show table if it has content.
+	\ifthenelse{\boolean{useTable}}{
+		\begin{wraptable}{r}{5.5cm}
+			\begin{tabulary}{5.5cm}{rL}
+				\tableContent
+			\end{tabulary}
+		\end{wraptable}		
+	}{} 
+	
+	% May not be neccessary if we allow half-sided recipes.
+	\clearpage
 }
 
 

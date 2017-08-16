@@ -17,12 +17,13 @@ a4paper,
 \usepackage{blindtext}
 \usepackage{nicefrac}
 
-
+\iffalse
 \usepackage[
 nowarnings,
 %myconfig 
 ]
 {xcookybooky}
+\fi
 
 \usepackage{cookerybook}
 
@@ -31,11 +32,11 @@ nowarnings,
 \DeclareRobustCommand{\textcelcius}{\ensuremath{^{\circ}\mathrm{C}}}
 
 
-\setcounter{secnumdepth}{1}
-\renewcommand*{\recipesection}[2][]
-{%
-	\subsection[#1]{#2}
-}
+%\setcounter{secnumdepth}{1}
+%\renewcommand*{\recipesection}[2][]
+%{%
+%	\subsection[#1]{#2}
+%}
 \renewcommand{\subsectionmark}[1]
 {% no implementation to display the section name instead
 }
