@@ -1,0 +1,52 @@
+%% This is not a generated file.
+%% Copyright (C) 2017 by Luca Michael Lach
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cookerybook}[2017/08/15 v0.1 Clean Cookbook Style File]
+
+\RequirePackage{cookingsymbols}              % Cookings symbols e.g. \Oven, \Dish etc
+\RequirePackage{fancyhdr}					 % Customizing header and footer
+\RequirePackage{etoolbox}					 % Facilitates some macro definitions
+\RequirePackage[utf8]{inputenc}   			 % Handle Umlaute correct by default
+
+
+\pagenumbering{gobble}						 % Remove pagenumbering before TOC
+
+\let\oldtoc\tableofcontents
+\renewcommand{\tableofcontents}
+{% Roman pagenumbering in TOC, arabic starting after TOC is drawn
+	\clearpage
+	\pagenumbering{Roman}
+	\oldtoc
+	\clearpage % If page is not cleared, arabic pagenumbering will start on last TOC page
+	\pagenumbering{arabic}
+}
+
+
+\newenvironment{cleanrecipe}[1]
+{%this will be executed at \begin{cleanrecipe}
+	
+		\def\ingContent{& \textbf{Zutaten} \\}
+		
+		\newcommand{\addIngredient}[1]{
+			\appto\ingContent{ & ##1 \\ } % Double Hashtags are neccessary to distinguish nested parameter 
+		}
+		
+		\newcommand{\g}[2]{\addIngredient{\textbf{##1g} ##2}}
+		
+		\begin{center}
+			\Large\textbf{#1}\normalsize
+		\end{center}
+}
+{%this will be executed at \end{cleanrecipe}
+	\begin{wraptable}{r}{5.5cm}
+		\begin{tabulary}{5.5cm}{rL}
+			\ingContent
+		\end{tabulary}
+	\end{wraptable}
+	\clearpage	
+}
+
+
+\endinput   % MUST be the last command in a .sty
+%EOF
