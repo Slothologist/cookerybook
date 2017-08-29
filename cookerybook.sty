@@ -4,6 +4,9 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{cookerybook}[2017/08/15 v0.1 Clean Cookbook Style File]
 
+% NOTES
+% keeping aspect ratio of images with scaling https://tex.stackexchange.com/questions/25988/scale-included-graphics-to-the-higher-ratio-instead-of-the-lower-for-given-width
+
 % TODO's
 % twosided thing
 % line under title
@@ -15,8 +18,7 @@
 % price calculation
 % fix ü's
 % what does cookery booky fucky do that pages look good? --> nothing. but make pages nicer
-
-
+\RequirePackage{ifthen}
 \RequirePackage{cookingsymbols}              % Cookings symbols e.g. \Oven, \Dish etc
 \RequirePackage{fancyhdr}					 % Customizing header and footer
 \RequirePackage{etoolbox}					 % Facilitates some macro definitions
@@ -24,12 +26,39 @@
 \RequirePackage{wrapfig}   			 		 % Allow wrapped tabulars
 \RequirePackage{tabulary}   		 		 % Enhanced tabular
 \RequirePackage[ngerman, english]{babel}     % Some language optimization stuff
+\RequirePackage[export]{adjustbox}
+\RequirePackage{tikz}
+\RequirePackage{calc}
 
 \RequirePackage{DejaVuSans}					 % Font sans serif
 \renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
 \RequirePackage{lmodern}					 % Makes fonts look nicer. Has to be set after font is chosen.
 
+% Some page formatting
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{2ex plus 0.5ex}
+
+\setlength{\textwidth}{15.5cm}
+\setlength{\textheight}{24.0cm}
+\setlength{\topmargin}{-0.8cm}
+\setlength{\headheight}{14pt} %0cm
+\setlength{\headsep}{1cm}
+\setlength{\topskip}{0cm}
+\setlength{\footskip}{1.4cm}
+\setlength{\evensidemargin}{-0.5cm}
+\setlength{\oddsidemargin}{0.5cm}
+\setlength{\voffset}{0cm}
+\setlength{\hoffset}{0cm}
+\setcounter{secnumdepth}{2} % subsubsections not numbered
+\setcounter{tocdepth}{3}    % subsubsections in the .toc file
+
+
 \DeclareRobustCommand{\textcelcius}{\ensuremath{^{\circ}\mathrm{C}}}
+
+\newcommand{\rectangle}[2]{{% #1 = width, #2 = height
+		\fboxsep=-\fboxrule\sbox0{}\wd0=#1\ht0=#2\relax\fbox{\box0}}}
+
+\newcommand{\rectangleplus}[3]{\tikz \fill[#3] (0,0) rectangle (#1,#2);}
 
 \pagenumbering{gobble}						 % Remove pagenumbering before TOC
 
@@ -45,18 +74,20 @@
 
 \newcounter{ingredientsCounter}
 \newcounter{spicesCounter}
+\newboolean{useTitleImage}
 
 \newenvironment{cleanrecipe}[1]
 {% This will be executed at \begin{cleanrecipe}
 		
-		% Reset counters.
+		% Reset counters and booleans.
 		\setcounter{ingredientsCounter}{0}
 		\setcounter{spicesCounter}{0}
+		\setboolean{useTitleImage}{false}
 		
 		% In this variable, the ingredientstable content will be saved.
 		% It is initialized with the ingredients headline, depending on the language setting.
 		\def\ingredientsContent{& \textbf{Zutaten} }
-		\def\spicesContent{& \textbf{Gewrze} }
+		\def\spicesContent{& \textbf{Gew\"urze} }
 		
 		% This command adds an already formatted entry to the ingredient
 		\newcommand{\addIngredient}[1]{
@@ -85,6 +116,12 @@
 		\newcommand{\spicestsp}[2]{\addSpice{\textbf{##1 TL} ##2}}
 		\newcommand{\spicestbsp}[2]{\addSpice{\textbf{##1 EL} ##2}}
 		\newcommand{\spicesunitless}[2]{\addSpice{\textbf{##1} ##2}}
+		
+		\def\titleImagePath{}
+		\newcommand{\setTitleImage}[1]{
+			\appto\titleImagePath{##1}
+			\setboolean{useTitleImage}{true}
+			}
 		
 		% A little hacky and ugly title.
 		\begin{center}
