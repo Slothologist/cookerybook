@@ -89,6 +89,9 @@
 		\def\ingredientsContent{& \textbf{Zutaten} }
 		\def\spicesContent{& \textbf{Gew\"urze} }
 		
+		% C
+		\def\preparationContent{  }
+		
 		% This command adds an already formatted entry to the ingredient
 		\newcommand{\addIngredient}[1]{
 			\addtocounter{ingredientsCounter}{1}
@@ -97,6 +100,9 @@
 		\newcommand{\addSpice}[1]{
 			\addtocounter{spicesCounter}{1}
 			\appto\spicesContent{ \\ & ##1  } % Double Hashtags are neccessary to distinguish nested parameter 
+		}
+		\newcommand{\preparation}[1]{
+			\appto\preparationContent{ ##1  } % Double Hashtags are neccessary to distinguish nested parameter 
 		}
 		
 		% The following commands take care of formatting the ingridient text.
@@ -117,6 +123,8 @@
 		\newcommand{\spicestbsp}[2]{\addSpice{\textbf{##1 EL} ##2}}
 		\newcommand{\spicesunitless}[2]{\addSpice{\textbf{##1} ##2}}
 		
+		
+		
 		\def\titleImagePath{}
 		\newcommand{\setTitleImage}[1]{
 			\appto\titleImagePath{##1}
@@ -125,7 +133,12 @@
 		
 		% A little hacky and ugly title.
 		\begin{center}
-			\Large\textbf{#1}\normalsize
+			\Huge 
+			\textbf{#1}\\
+			\vspace*{-\baselineskip}
+			\vspace{0.4cm}
+			\rectangleplus{13cm}{0.04cm}{red}\\
+			\normalsize
 		\end{center}
 }
 {% This will be executed at \end{cleanrecipe}
@@ -156,12 +169,14 @@
 	
 	% Only show table if it has content.
 	\ifthenelse{\boolean{useTable}}{
-		\begin{wraptable}{r}{5.5cm}
-			\begin{tabulary}{5.5cm}{rL}
+		\begin{wraptable}{r}{4cm}%r if odd, l otherwise
+			\begin{tabulary}{4cm}{rL}
 				\tableContent
 			\end{tabulary}
 		\end{wraptable}		
-	}{} 
+	}{}
+	
+	\preparationContent 
 	
 	% May not be neccessary if we allow half-sided recipes.
 	\clearpage
