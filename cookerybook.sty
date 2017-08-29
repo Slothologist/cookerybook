@@ -8,16 +8,17 @@
 % keeping aspect ratio of images with scaling https://tex.stackexchange.com/questions/25988/scale-included-graphics-to-the-higher-ratio-instead-of-the-lower-for-given-width
 
 % TODO's
-% twosided thing
-% line under title
+% twosided thing (right and left zutaten)
+% line under title nicer
+% symbols under line
 % recipes shall appear in the TOC
-% add pictures
-% fix table
 % pass language argument, change hardcoded words respectively
 % calorie calculation
 % price calculation
-% fix ü's
-% what does cookery booky fucky do that pages look good? --> nothing. but make pages nicer
+% add parameter for cooking meta data (time, heat, etc)
+% parameter for picture sclaling
+% move pic way more down?
+
 \RequirePackage{ifthen}
 \RequirePackage{cookingsymbols}              % Cookings symbols e.g. \Oven, \Dish etc
 \RequirePackage{fancyhdr}					 % Customizing header and footer
@@ -75,6 +76,7 @@
 \newcounter{ingredientsCounter}
 \newcounter{spicesCounter}
 \newboolean{useTitleImage}
+\newboolean{usePicture}
 
 \newenvironment{cleanrecipe}[1]
 {% This will be executed at \begin{cleanrecipe}
@@ -83,14 +85,17 @@
 		\setcounter{ingredientsCounter}{0}
 		\setcounter{spicesCounter}{0}
 		\setboolean{useTitleImage}{false}
+		\setboolean{usePicture}{false}
 		
 		% In this variable, the ingredientstable content will be saved.
 		% It is initialized with the ingredients headline, depending on the language setting.
 		\def\ingredientsContent{& \textbf{Zutaten} }
 		\def\spicesContent{& \textbf{Gew\"urze} }
 		
-		% C
-		\def\preparationContent{  }
+		% Additional variables where content is saved that is set in the env
+		% Content is stored for later use
+		\def\preparationContent{}
+		\def\pathToMainPicture{}
 		
 		% This command adds an already formatted entry to the ingredient
 		\newcommand{\addIngredient}[1]{
@@ -102,7 +107,11 @@
 			\appto\spicesContent{ \\ & ##1  } % Double Hashtags are neccessary to distinguish nested parameter 
 		}
 		\newcommand{\preparation}[1]{
-			\appto\preparationContent{ ##1  } % Double Hashtags are neccessary to distinguish nested parameter 
+			\appto\preparationContent{##1} % Double Hashtags are neccessary to distinguish nested parameter 
+		}
+		\newcommand{\mainPicture}[1]{
+			\setboolean{usePicture}{true}
+			\appto\pathToMainPicture{##1} % Double Hashtags are neccessary to distinguish nested parameter 
 		}
 		
 		% The following commands take care of formatting the ingridient text.
@@ -177,6 +186,15 @@
 	}{}
 	
 	\preparationContent 
+	
+	% Only show table if it has content.
+	\ifthenelse{\boolean{usePicture}}{
+		\vfill % Move picture at the end of the page.
+		\begin{minipage}[b][0.5\textheight][t]{\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, height=0.35\textheight]{\pathToMainPicture}
+		\end{minipage}	
+	}{}
 	
 	% May not be neccessary if we allow half-sided recipes.
 	\clearpage
