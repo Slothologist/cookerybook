@@ -1,0 +1,4 @@
+[submodule "cookbook-tex"]
+	path = cookbook-tex
+	url = https://github.com/llach/cookbook-tex
+	branch = master
