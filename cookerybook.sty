@@ -8,14 +8,13 @@
 % keeping aspect ratio of images with scaling https://tex.stackexchange.com/questions/25988/scale-included-graphics-to-the-higher-ratio-instead-of-the-lower-for-given-width
 
 % TODO's
-% twosided thing (right and left zutaten)
 % line under title nicer
 % symbols under line
 % recipes shall appear in the TOC
 % calorie calculation
 % price calculation
 % add parameter for cooking meta data (time, heat, etc)
-% parameter for picture sclaling
+% parameter for picture scaling
 % move pic way more down?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -131,10 +130,23 @@
 \let\oldtoc\tableofcontents  % Let another commandname point to \toc, so it can be used while redefining itself
 \renewcommand{\tableofcontents}
 {% Roman pagenumbering in TOC, arabic starting after TOC is drawn
+	
+	% Clear title page
 	\clearpage
+	
 	\pagenumbering{Roman}
+	
+	% Use redefined tabeofcontents
 	\oldtoc
-	\clearpage % If page is not cleared, arabic pagenumbering will start on last TOC page
+	
+	% Clearing pages depending on sided setting
+	% If page is not cleared, arabic pagenumbering will start on last TOC page
+	\if@twoside
+		\cleardoublepage
+	\else
+		\clearpage 
+	\fi
+	
 	\pagenumbering{arabic}
 }
 
@@ -248,11 +260,29 @@
 	
 	% Only show table if it has content.
 	\ifthenelse{\boolean{useTable}}{
-		\begin{wraptable}{r}{4cm}%r if odd, l otherwise
-			\begin{tabulary}{4cm}{rL}
-				\tableContent
-			\end{tabulary}
-		\end{wraptable}		
+		
+		\if@twoside
+			\ifodd\arabic{page}
+				\begin{wraptable}{r}{4cm}%r if odd, l otherwise
+					\begin{tabulary}{4cm}{rL}
+						\tableContent
+					\end{tabulary}
+				\end{wraptable}	
+			\else
+				\begin{wraptable}{l}{4cm}
+					\begin{tabulary}{4cm}{rL}
+						\tableContent
+					\end{tabulary}
+				\end{wraptable}	
+			\fi
+		\else
+			\begin{wraptable}{r}{4cm}%r if odd, l otherwise
+				\begin{tabulary}{4cm}{rL}
+					\tableContent
+				\end{tabulary}
+			\end{wraptable}	
+		\fi
+	
 	}{}
 	
 	\preparationContent 
