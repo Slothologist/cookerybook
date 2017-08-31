@@ -8,7 +8,6 @@
 % keeping aspect ratio of images with scaling https://tex.stackexchange.com/questions/25988/scale-included-graphics-to-the-higher-ratio-instead-of-the-lower-for-given-width
 
 % TODO's
-% pass color of recipe title line
 % line under title nicer
 % recipes shall appear in the TOC
 % parameter for picture scaling
@@ -70,6 +69,7 @@
 
 \DeclareStringOption[german]{lang}[german]
 \DeclareStringOption[european]{units}[european]
+\DeclareStringOption[red]{titlelinecolor}[red]
 
 \ProcessKeyvalOptions*
 
@@ -393,7 +393,7 @@
 		\textbf{\recipeTitle}\\
 		\vspace*{-\baselineskip}
 		\vspace{0.4cm}
-		\rectangleplus{13cm}{0.04cm}{red}\\
+		\rectangleplus{13cm}{0.04cm}{\cookerybook@titlelinecolor}\\
 		\normalsize
 		%\ifthenelse{\equal{\recipeMetaData}{}}{}
 		%{\recipeMetaData}
