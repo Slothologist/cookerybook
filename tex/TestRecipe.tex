@@ -1,5 +1,14 @@
 % Test for new, clean recipe style
-\begin{cleanrecipe}{Google Picture Search}
+\begin{cleanrecipe}
+[
+	preparationtime = 100,
+	cookingtime = 120,
+	bakingtemperature = 4,
+	bakingtime = 3,
+	portion = 5,
+	author = 6
+]	
+{Google Picture Search}
 	
 	\g{500}{Google}
 	\tbsp{700}{Zwiebeln}
@@ -12,7 +21,11 @@
 \end{cleanrecipe}
 
 % Test for new, clean recipe style
-\begin{cleanrecipe}{Wraps con Carne}
+\begin{cleanrecipe}
+[
+	author = me
+]
+{Wraps con Carne}
 
 	\g{500}{Rinderhack}
 	\g{700}{Zwiebeln}

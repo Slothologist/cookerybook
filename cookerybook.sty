@@ -8,12 +8,12 @@
 % keeping aspect ratio of images with scaling https://tex.stackexchange.com/questions/25988/scale-included-graphics-to-the-higher-ratio-instead-of-the-lower-for-given-width
 
 % TODO's
+% pass down fahrenheit or celcius in package
+% pass color of recipe title line
 % line under title nicer
-% symbols under line
 % recipes shall appear in the TOC
 % calorie calculation
 % price calculation
-% add parameter for cooking meta data (time, heat, etc)
 % parameter for picture scaling
 % move pic way more down?
 
@@ -23,6 +23,8 @@
 
 \RequirePackage{ifthen}
 \RequirePackage{cookingsymbols}              % Cookings symbols e.g. \Oven, \Dish etc
+\RequirePackage[weather]{ifsym} 			 % Symbol package e.g. \Interval, \Wecker etc
+\RequirePackage{tikzsymbols}	      		 % Pot symbol
 \RequirePackage{fancyhdr}					 % Customizing header and footer
 \RequirePackage{etoolbox}					 % Facilitates some macro definitions
 \RequirePackage[utf8]{inputenc}   			 % Handle Umlaute correct by default
@@ -34,11 +36,12 @@
 \RequirePackage{calc}						 % Calculate things
 \RequirePackage{xkeyval}				     % Set keys; used here for optional arguments 
 \RequirePackage{kvoptions}					 % Declare optional arguments for the package
-
 \RequirePackage{DejaVuSans}					 % Font sans serif
-\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+\renewcommand*\familydefault{\sfdefault}     % Only if the base font of the document is to be sans serif
 \RequirePackage{lmodern}					 % Makes fonts look nicer. Has to be set after font is chosen.
-
+\RequirePackage{xstring}					 % Check if commands are numbers.
+\RequirePackage{intcalc}					 % Do calculations on integer.
+\RequirePackage{textcomp}					 % Use celcius symbol.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% FORMATTING %%%%%%%%
@@ -73,22 +76,25 @@
 \define@key{headlines}{inghead}[Ingredients]{\def\cb@inghead{#1}}
 \define@key{headlines}{spicehead}[Spices]{\def\cb@spicehead{#1}}
 \define@key{headlines}{prephead}[Preparation]{\def\cb@prephead{#1}}
+\define@key{headlines}{authortag}[written by]{\def\cb@authortag{#1}}
 
 \savekeys{headlines}
 {
 	inghead,
 	spiceshead,
-	prephead
+	prephead,
+	authortag
 }
 \newcommand*{\setHeadlines}[1]
 {
 	\setkeys{headlines}{#1}
 }
 \setHeadlines
-{% init keys
+{% init headline keys
 	inghead,
 	spicehead,
-	prephead
+	prephead,
+	authortag
 }
 
 \ifthenelse{\equal{\cookerybook@lang}{german}}
@@ -96,7 +102,8 @@
 		\setHeadlines{
 			inghead = Zutaten,
 			spicehead = Gew\"urze,
-			prephead = Zubereitung
+			prephead = Zubereitung,
+			authortag = geschrieben von
 		}
 	}{}
 	
@@ -105,7 +112,8 @@
 	\setHeadlines{
 		inghead = Ingredients,
 		spicehead = Spices,
-		prephead = Preparation
+		prephead = Preparation,
+		authortag = written by
 	}
 }{}
 
@@ -113,13 +121,38 @@
 %%%%%%%% COMMANDS %%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% have easier celcius circles
+% Have easier celcius circles (gives error when used)
 \DeclareRobustCommand{\textcelcius}{\ensuremath{^{\circ}\mathrm{C}}}
 
+% Draws a rectangle with given width & height
 \newcommand{\rectangle}[2]{{% #1 = width, #2 = height
 		\fboxsep=-\fboxrule\sbox0{}\wd0=#1\ht0=#2\relax\fbox{\box0}}}
 
+% Draws a filled rectangle with a given color
 \newcommand{\rectangleplus}[3]{\tikz \fill[#3] (0,0) rectangle (#1,#2);}
+
+% This command will nicely format a given number of minutes in Xh Xmin
+\newcommand{\timeFormat}[1]
+{%
+	\def\hours{}%
+	\def\minutes{}%
+	\IfInteger{#1}
+	{%
+		\ifnum\intcalcDiv{#1}{60} > 0
+		\appto\hours{\intcalcDiv{#1}{60}}%
+		\fi
+		\ifnum\intcalcMod{#1}{60} > 0
+		\appto\minutes{\intcalcMod{#1}{60}}%
+		\fi
+		\ifthenelse{\equal{\hours}{}}
+		{\ifthenelse{\equal{\minutes}{}}
+			{}
+			{\minutes min}}%
+		{\ifthenelse{\equal{\minutes}{}}
+			{\hours h}
+			{\hours h \minutes min}}%
+	}{}%
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% TOC & PAGES %%%%%%
@@ -152,22 +185,67 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% RECIPE OPTIONS %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\define@key{recipe}{preparationtime}[]{\def\cb@preptime{#1}}
+\define@key{recipe}{cookingtime}[]{\def\cb@cookingtime{#1}}
+\define@key{recipe}{bakingtime}[]{\def\cb@bakingtime{#1}}
+\define@key{recipe}{bakingtemperature}[]{\def\cb@bakingtemp{#1}}
+\define@key{recipe}{portion}[]{\def\cb@portion{#1}}
+\define@key{recipe}{author}[]{\def\cb@author{#1}}
+
+\savekeys{recipe}
+{
+	preparationtime,
+	cookingtime,
+	bakingtime,
+	bakingtemperature,
+	portion,
+	author
+}
+
+\newcommand*{\setRecipe}[1]
+{
+	\setkeys{recipe}{#1}
+}
+
+\setRecipe
+{% init recipe keys
+	preparationtime,
+	cookingtime,
+	bakingtime,
+	bakingtemperature,
+	portion,
+	author
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% RECIPE ENV %%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newcounter{ingredientsCounter}
 \newcounter{spicesCounter}
-\newboolean{useTitleImage}
 \newboolean{usePicture}
 
-\newenvironment{cleanrecipe}[1]
+
+\newenvironment{cleanrecipe}[2][]
 {% This will be executed at \begin{cleanrecipe}
 		
 		% Reset counters and booleans.
 		\setcounter{ingredientsCounter}{0}
 		\setcounter{spicesCounter}{0}
-		\setboolean{useTitleImage}{false}
 		\setboolean{usePicture}{false}
+		
+		\setRecipe
+		{% reset recipe keys
+			preparationtime,
+			cookingtime,
+			bakingtime,
+			bakingtemperature,
+			portion,
+			author
+		}
 		
 		% In this variable, the ingredientstable content will be saved.
 		% It is initialized with the ingredients headline, depending on the language setting.
@@ -178,6 +256,13 @@
 		% Content is stored for later use
 		\def\preparationContent{}
 		\def\pathToMainPicture{}
+		\def\titleImagePath{}
+		\def\recipeMetaData{}
+		\def\recipeTitle{}
+		\def\recipeAuthor{}
+				
+		% Set recipe title.
+		\appto\recipeTitle{#2}
 		
 		% This command adds an already formatted entry to the ingredient
 		\newcommand{\addIngredient}[1]{
@@ -214,32 +299,66 @@
 		\newcommand{\spicestbsp}[2]{\addSpice{\textbf{##1 EL} ##2}}
 		\newcommand{\spicesunitless}[2]{\addSpice{\textbf{##1} ##2}}
 		
+		\setRecipe{#1}
 		
+		\ifthenelse{\equal{\cb@preptime}{}}{}
+		{
+			\appto\recipeMetaData{\hspace{8px}\Gloves\hspace{3px}\timeFormat{\cb@preptime}}
+		}
 		
-		\def\titleImagePath{}
-		\newcommand{\setTitleImage}[1]{
-			\appto\titleImagePath{##1}
-			\setboolean{useTitleImage}{true}
-			}
+		\ifthenelse{\equal{\cb@cookingtime}{}}{}
+		{
+			\appto\recipeMetaData{\hspace{8px}\pot\hspace{3px}\timeFormat{\cb@cookingtime}}
+		}
 		
-		% A little hacky and ugly title.
-		\begin{center}
-			\Huge 
-			\textbf{#1}\\
-			\vspace*{-\baselineskip}
-			\vspace{0.4cm}
-			\rectangleplus{13cm}{0.04cm}{red}\\
-			\normalsize
-		\end{center}
+		\ifthenelse{\equal{\cb@bakingtime}{}}{}
+		{
+			\appto\recipeMetaData{\hspace{8px}\Oven\hspace{3px}\timeFormat{\cb@bakingtime}}
+		}
+		
+		\ifthenelse{\equal{\cb@bakingtemp}{}}{}
+		{
+			\IfInteger{\cb@bakingtemp}
+			{
+				\appto\recipeMetaData{\hspace{8px}\Thermo{3}\hspace{3px}\cb@bakingtemp\textdegree{}C}
+			}{}
+		}
+		
+		\ifthenelse{\equal{\cb@portion}{}}{}
+		{
+			\IfInteger{\cb@portion}
+			{
+				\appto\recipeMetaData{\hspace{8px}\Dish\hspace{3px}\cb@portion}
+			}{}
+		}
+		
+		\ifthenelse{\equal{\cb@author}{}}{}
+		{
+			\appto\recipeAuthor{\cb@author}
+		}
+		
 }
 {% This will be executed at \end{cleanrecipe}
+	
+	% Title with meta data for recipe.
+	\begin{center}
+		\Huge 
+		\textbf{\recipeTitle}\\
+		\vspace*{-\baselineskip}
+		\vspace{0.4cm}
+		\rectangleplus{13cm}{0.04cm}{red}\\
+		\normalsize
+		%\ifthenelse{\equal{\recipeMetaData}{}}{}
+		%{\recipeMetaData}
+		\mbox{\recipeMetaData}%\recipeMetaData
+	\end{center}
 	
 	% Will be set if an ingredient / spices table must be printed.
 	\newboolean{useTable}
 	
 	% Evaluates which parts are set and therefore need to be printed.
-	\ifnum\value{ingredientsCounter}>0
-		\ifnum\value{spicesCounter}>0
+	\ifnum\value{ingredientsCounter} > 0
+		\ifnum\value{spicesCounter} > 0
 			\def\tableContent{
 				\ingredientsContent
 				\\ \\
@@ -251,7 +370,7 @@
 			\setboolean{useTable}{true} 
 		\fi
 	\else
-		\ifnum\value{spicesCounter}>0
+		\ifnum\value{spicesCounter} > 0
 			\def\tableContent{
 				\spicesContent}
 			\setboolean{useTable}{true}
@@ -285,7 +404,10 @@
 	
 	}{}
 	
+	% Insert preparation text.
 	\preparationContent 
+	
+	\hfill\cb@authortag\hspace{3px}\recipeAuthor
 	
 	% Only show table if it has content.
 	\ifthenelse{\boolean{usePicture}}{
