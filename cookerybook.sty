@@ -8,7 +8,6 @@
 % keeping aspect ratio of images with scaling https://tex.stackexchange.com/questions/25988/scale-included-graphics-to-the-higher-ratio-instead-of-the-lower-for-given-width
 
 % TODO's
-% pass down fahrenheit or celcius in package
 % pass color of recipe title line
 % line under title nicer
 % recipes shall appear in the TOC
@@ -66,14 +65,17 @@
 \setcounter{tocdepth}{3}    % subsubsections in the .toc file
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%% LANGUAGE %%%%%%%%
+%%%%% PACKAGE OPTIONS %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-% Add language argument 
 \DeclareStringOption[german]{lang}[german]
+\DeclareStringOption[european]{units}[european]
 
 \ProcessKeyvalOptions*
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% LANGUAGE %%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \define@key{headlines}{inghead}[Ingredients]{\def\cb@inghead{#1}}
 \define@key{headlines}{spicehead}[Spices]{\def\cb@spicehead{#1}}
@@ -116,6 +118,49 @@
 		spicehead = Spices,
 		prephead = Preparation,
 		authortag = written by
+	}
+}{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%% UNITS %%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\define@key{units}{teaspoon}[tsp]{\def\cb@teaspoon{#1}}
+\define@key{units}{tablespoon}[tbsp]{\def\cb@tablespoon{#1}}
+\define@key{units}{heat}[]{\def\cb@heat{#1}}
+
+\savekeys{units}
+{
+	teaspoon,
+	tablespoon,
+	heat
+}
+\newcommand*{\setUnits}[1]
+{
+	\setkeys{units}{#1}
+}
+\setUnits
+{% init headline keys
+	teaspoon,
+	tablespoon,
+	heat
+}
+
+\ifthenelse{\equal{\cookerybook@units}{european}}
+{
+	\setUnits{
+		teaspoon = TL,
+		tablespoon = EL,
+		heat = C
+	}
+}{}
+
+\ifthenelse{\equal{\cookerybook@units}{american}}
+{
+	\setUnits{
+		teaspoon = tsp,
+		tablespoon = tbsp,
+		heat = F
 	}
 }{}
 
@@ -289,16 +334,16 @@
 		\newcommand{\kg}[2]{\addIngredient{\textbf{##1kg} ##2}}
 		\newcommand{\ml}[2]{\addIngredient{\textbf{##1ml} ##2}}
 		\newcommand{\liter}[2]{\addIngredient{\textbf{##1l} ##2}}
-		\newcommand{\tsp}[2]{\addIngredient{\textbf{##1 TL} ##2}}
-		\newcommand{\tbsp}[2]{\addIngredient{\textbf{##1 EL} ##2}}
+		\newcommand{\tsp}[2]{\addIngredient{\textbf{##1 \cb@teaspoon} ##2}}
+		\newcommand{\tbsp}[2]{\addIngredient{\textbf{##1 \cb@tablespoon} ##2}}
 		\newcommand{\unitless}[2]{\addIngredient{\textbf{##1} ##2}}
 		
 		\newcommand{\spicesg}[2]{\addSpice{\textbf{##1g} ##2}}
 		\newcommand{\spiceskg}[2]{\addSpice{\textbf{##1kg} ##2}}
 		\newcommand{\spicesml}[2]{\addSpice{\textbf{##1ml} ##2}}
 		\newcommand{\spicesliter}[2]{\addSpice{\textbf{##1l} ##2}}
-		\newcommand{\spicestsp}[2]{\addSpice{\textbf{##1 TL} ##2}}
-		\newcommand{\spicestbsp}[2]{\addSpice{\textbf{##1 EL} ##2}}
+		\newcommand{\spicestsp}[2]{\addSpice{\textbf{##1 \cb@teaspoon} ##2}}
+		\newcommand{\spicestbsp}[2]{\addSpice{\textbf{##1 \cb@tablespoon} ##2}}
 		\newcommand{\spicesunitless}[2]{\addSpice{\textbf{##1} ##2}}
 		
 		\setRecipe{#1}
@@ -322,7 +367,7 @@
 		{
 			\IfInteger{\cb@bakingtemp}
 			{
-				\appto\recipeMetaData{\hspace{8px}\Thermo{3}\hspace{3px}\cb@bakingtemp\textdegree{}C}
+				\appto\recipeMetaData{\hspace{8px}\Thermo{3}\hspace{3px}\cb@bakingtemp\textdegree{}\cb@heat}
 			}{}
 		}
 		
