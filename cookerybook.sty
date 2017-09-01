@@ -10,7 +10,6 @@
 % TODO's
 % line under title nicer
 % recipes shall appear in the TOC
-% move pic way more down?
 
 %TODO's (not in tex)
 % calorie calculation
@@ -200,6 +199,10 @@
 	}{}%
 }
 
+% Calculates space left on page.
+\newdimen\spaceleft
+\spaceleft=\dimexpr\textheight-\pagetotal\relax
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% TOC & PAGES %%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -388,6 +391,8 @@
 		
 }
 {% This will be executed at \end{cleanrecipe}
+	
+	\addcontentsline{toc}{subsection}{\recipeTitle}
 	
 	% Title with meta data for recipe.
 	\begin{center}
