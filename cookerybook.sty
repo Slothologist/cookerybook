@@ -10,7 +10,6 @@
 % TODO's
 % line under title nicer
 % recipes shall appear in the TOC
-% parameter for picture scaling
 % move pic way more down?
 
 %TODO's (not in tex)
@@ -241,6 +240,7 @@
 \define@key{recipe}{bakingtemperature}[]{\def\cb@bakingtemp{#1}}
 \define@key{recipe}{portion}[]{\def\cb@portion{#1}}
 \define@key{recipe}{author}[]{\def\cb@author{#1}}
+\define@key{recipe}{mainpicturescaling}[]{\def\cb@mainpicturescaling{#1}}
 
 \savekeys{recipe}
 {
@@ -249,7 +249,8 @@
 	bakingtime,
 	bakingtemperature,
 	portion,
-	author
+	author,
+	mainpicturescaling
 }
 
 \newcommand*{\setRecipe}[1]
@@ -264,7 +265,8 @@
 	bakingtime,
 	bakingtemperature,
 	portion,
-	author
+	author,
+	mainpicturescaling = 0.35
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -459,9 +461,9 @@
 	% Only show table if it has content.
 	\ifthenelse{\boolean{usePicture}}{
 		\vfill % Move picture at the end of the page.
-		\begin{minipage}[b][0.5\textheight][t]{\textwidth}
+		\begin{minipage}[b][\cb@mainpicturescaling\textheight][t]{\textwidth}
 			\centering
-			\includegraphics[width=\textwidth, height=0.35\textheight]{\pathToMainPicture}
+			\includegraphics[max size={\textwidth}{\cb@mainpicturescaling\textheight}]{\pathToMainPicture}
 		\end{minipage}	
 	}{}
 	
