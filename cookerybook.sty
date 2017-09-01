@@ -36,6 +36,7 @@
 \RequirePackage{xstring}					 % Check if commands are numbers.
 \RequirePackage{intcalc}					 % Do calculations on integer.
 \RequirePackage{textcomp}					 % Use celcius symbol.
+\RequirePackage{caption}					 % Makes captions in minipages possible
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% FORMATTING %%%%%%%%
@@ -161,6 +162,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% COMMANDS %%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
+\addto\captionsenglish{\renewcommand{\figurename}{Bild}}
 
 % Have easier celcius circles (gives error when used)
 \DeclareRobustCommand{\textcelcius}{\ensuremath{^{\circ}\mathrm{C}}}
@@ -302,8 +304,10 @@
 		
 		% Additional variables where content is saved that is set in the env
 		% Content is stored for later use
+		\def\introductionContent{}
 		\def\preparationContent{}
 		\def\pathToMainPicture{}
+		\def\mainPictureCaption{}
 		\def\titleImagePath{}
 		\def\recipeMetaData{}
 		\def\recipeTitle{}
@@ -321,12 +325,16 @@
 			\addtocounter{spicesCounter}{1}
 			\appto\spicesContent{ \\ & ##1  } % Double Hashtags are neccessary to distinguish nested parameter 
 		}
+		\newcommand{\introduction}[1]{
+			\appto\introductionContent{##1} % Double Hashtags are neccessary to distinguish nested parameter 
+		}
 		\newcommand{\preparation}[1]{
 			\appto\preparationContent{##1} % Double Hashtags are neccessary to distinguish nested parameter 
 		}
-		\newcommand{\mainPicture}[1]{
+		\newcommand{\mainPicture}[2]{
 			\setboolean{usePicture}{true}
 			\appto\pathToMainPicture{##1} % Double Hashtags are neccessary to distinguish nested parameter 
+			\appto\mainPictureCaption{##2} % Double Hashtags are neccessary to distinguish nested parameter 
 		}
 		
 		% The following commands take care of formatting the ingridient text.
@@ -465,6 +473,7 @@
 		\begin{minipage}[b][\cb@mainpicturescaling\textheight][t]{\textwidth}
 			\centering
 			\includegraphics[max size={\textwidth}{\cb@mainpicturescaling\textheight}]{\pathToMainPicture}
+			\captionof{figure}{\mainPictureCaption}
 		\end{minipage}	
 	}{}
 	
